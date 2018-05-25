@@ -1,275 +1,112 @@
-Linux:
+Document for Single Node Stack, Means (Web Server, App Server & DB Server on single node)
+Step 1 : Db Server Setup.
+1. Install DB Server
 
-  Basic:
-    System Info:
-        H/W
-            - CPU
-                $ cat /proc/cpuinfo
-            - MEM 
-                $ cat /proc/meminfo
-            - DISK 
-                $ sudo fdisk -l
-        S/W
-            - OS Vendor
-            - OS Version
-                $ cat /etc/*release
-            - OS Arch
-                $ uname -i 
-                x86_64/x64              -> 64 bit 
-                x86/i386,i586,i686      -> 32 bit
-   
-    User Notations:
-      $ -> Normal User
-      # -> Root User
-      
-    Linux Command Syntax:
-        command-name {options} {inputs}
-            ex: uname
-                uname -i 
-                cat /proc/cpuinfo
+# yum install mariadb-server -y
 
-            Options:
-                -(single character) , -i -x, -s
-                --(single word) , --help, --verbose
+2. Start MariaDB Service
 
-            Default option for all commands : --help
+# systemctl enable mariadb
+# systemctl start mariadb
 
-    Linux Commands help:
+3. Create DB and Create users to access DB.
 
-    List files & Dir: 
-        $ ls
-        $ ls -l     <-- Shows long list
-        
-        Type of file can be determined by ls -l command and the first character denotes that.
-          - -> Regular File
-          d -> directory 
-        Note: There are total 7 types of files, Explore them.
-        
-    Files:
-        Create file     - touch 
-        Remove file     - rm
-        Rename a file   - mv
-          $ mv source target
-            1) If target does not exist ??
-              Rename the file 
-            2) If target exists ??
-              Overwrite the file (1. Remove target , 2. Rename Source to target )
-            3) If target exists and if it is a directory.
-              Moves file into target directory 
-        Copy a file     - cp
+Create a file student.sql
 
-    Directories:
-        Linux Directory Structure
-        / -> Root Directory 
-        
-        (Explore linux default directories and their purpose https://www.thegeekstuff.com/2010/09/linux-file-system-structure/ )
-        Switch from one directory 
-          $ cd
-                1) cd  -> Takes you to your home directory 
-                2) cd / -> Take you to `/` directory
-                3) cd - -> Takes you to previous working directory
-                4) cd ..  -> Takes to parent directory (.. denotes parent directory,   . denotes present directory)
-                
-          $ pwd 
+# vim student.sql
 
-        Create Directory 
-          $ mkdir dir-name
-        Remove a Directory 
-          $ rm  -r dir-name
-        Rename Directory 
-          $ mv dir-name new-dir-name
-              1) If new-dir-name does not exist ?? 
-                  It is just renaming directory 
-              2) If new-dir-name already exists ??
-                  It is going to move the directory into new-dir-name
-                  
-        Copy a Directory 
-          $ cp -r source-dir remote-dir
-          
-        Move files from one dir to another
-        Copy file from one dir to another
-    
-    Editor:
-      ->  vi / vim / nano / gedit 
-      *** vi / vim 
-Image of VI Editor: image
+Copy the following content into that file.
 
-    Search Files & Directories:
-      1. Find Command.  
-          $ find /etc "*.conf"
-          $ find /home/ec2-user -name "*.conf" -type f
-          $ find /home/ec2-user -name "*.conf" -type d
-          
-      2. Locate command.
-         locate command will not be there by default , hence lets install and use it.
-          $ sudo yum install mlocate -y
-          $ sudo updatedb
-          
-          $ locate "*.conf"
-          $ locate "*.conf" | grep /home
-    Filter Commands:
-      Perform this command before going with commands.
-        $ sudo cp /var/log/messages .;sudo chmod 666 messages
-      -> cat 
-        $ cat messages
-      -> wc 
-        $ wc -l  messages
-        $ wc -c  messages
-      -> head
-        $ head messages
-        $ head -2 messages
-      -> tail 
-        $ tail messages
-        $ tail -n 2 messages
-      -> grep 
-        $ grep yum messages 
-        $ grep yum messages
-      -> cut
-        $ cut -d ':' -f 1 /etc/passwd
-      
-    Utilities:
-      wget command is not there by default in linux, Hence install it.
-      $ sudo yum install wget -y
-      -> wget 
-        $ wget http://www-eu.apache.org/dist//httpd/httpd-2.4.33.tar.gz
-        
-      -> curl 
-        Curl is command to browse over CLI.
-        $ curl <URL>
-        
-      -> tar 
-          $ tar -xz httpd-2.4.33.tar.gz 
-          
-          .gz  -> Gunzip
-          .bz2  -> Bunzip2 
-            Bzip2 is not available in system by default, Install it using the following command.
-            
-          $ sudo yum install bzip2 -y
-          
-      -> Check size of the file 
-          $ ls -lh 
-          
-      -> Check the size of the directory & files
-          $ du  -sh *
-      
-      -> Pipes  (|) 
-image
+create database studentapp;
+use studentapp;
+CREATE TABLE Students(student_id INT NOT NULL AUTO_INCREMENT,
+	student_name VARCHAR(100) NOT NULL,
+    student_addr VARCHAR(100) NOT NULL,
+	student_age VARCHAR(3) NOT NULL,
+	student_qual VARCHAR(20) NOT NULL,
+	student_percent VARCHAR(10) NOT NULL,
+	student_year_passed VARCHAR(10) NOT NULL,
+	PRIMARY KEY (student_id)
+);
+grant all privileges on studentapp.* to 'student'@'%' identified by 'student@1';
+flush privileges;
 
-  Admin:
-  
-    Before starting any admin commands, become a root user to perform admin activities.
-    
-    $ sudo su - 
-    
-    How to stop a server:
-      # init 0
-      # shutdown -h 
-      # halt
-      
-    How to restart a server:
-      # init 6
-      # reboot
-      # shutdown -r
-    
-    validate system reboot by using 
-      $ uptime
-    
-    Package Management:
-      Installation of softwares are three types.
-      1) RPM based installation (EXE based installation)
-        Redhat package manager / RPM package manager
-        # rpm <- Managing rpm's / But this is not used now.
-        
-        # yum <- Yellowdog Updated Modifier
-        
-        List Packages
-          local (installed packages)
-              # yum list installed
-          remote (not installed, but are available to install)
-              # yum list available 
-          both (local & remote)
-              # yum list {or} # yum list all 
-         
-        Install Package 
-            # yum install package-name -y
-            
-        Remove a Package
-            # yum remove pacakge-name -y
-            # yum erase package-name -y
-            
-        Update a Package 
-            # yum check-update 
-            # yum update pack-name -y
-            # yum upgrade pack-name -y
-            
-            # yum update -y
-              -> This is to apply all package updates.
-            
-      2) Binary Installation  <- Will be discussed in project
-      3) Source based Installation <- Will be discussed in project
-      
-    Service Management:
-      CentOS7:
-        # systemctl list-units -a -t service  <- To list services which are enabled
-        # systemctl list-unit-files -a 
-        # systemctl status service-name 
-        # systemctl start service-name
-        # systemctl stop service-name
-        # systemctl restart service-name
-        
-        # systemctl enable service-name
-        # systemctl disable service-name
-        
-      CentOS6:
-        # service service-name status
-        # service service-name start
-        # service service-name stop
-        # service service-name restart 
-        
-        # chkconfig --list    <- To list all the services
-        # chkconfig service-name on
-        # chkconfig service-name off
-        
-        
-    User Management:
-        - Groups
-          # groupadd group-name
-          Above command will add a group, but to verify group is added or not.. Run the following commands
-          # getent group
-          
-          # groupdel
-          # groupmod
-          
-        - Users
-          # useradd -g devops raju 
-          Check user created or not.
-          # id raju
-          # getent passwd 
-          
-          # usermod 
-          # userdel
-          
-          To switch from one user  to another user 
-          $ su - username <- It asks for password if you are normal user
-          
-          To set/reset the password for a user, 
-          # passwd raju          
-        
-        - Sudoers
-          # visudo
-          
-          rahim ALL=(ALL) NOPASSWD: ALL
-        
-        - File/Dir Permissions
-image
+After that load this file to mysql.
 
-    Disk Management:
-      # fdisk -l
-      # df -h
-    Network Management:
-      # ip a
-      # netstat -lntp 
-    Process Management
-      # ps -ef 
-      # ps -ef | grep proccess-name
-      # kill <PID>
+# mysql < student.sql
+
+Step 2 : App Server Setup. (Tomcat)
+1. Install Java
+
+# yum install java -y
+
+2. Download Tomcat and extract it
+
+# cd /root
+# wget -O- https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.6/bin/apache-tomcat-9.0.6.tar.gz | tar -xz
+
+3. Configure Tomcat
+
+Download war and jar files
+
+# cd /root/apache-tomcat-9.0.6
+# rm -rf webapps/*
+# wget https://github.com/cit-aliqui/APP-STACK/raw/master/student.war -O webapps/student.war
+
+# wget https://github.com/cit-aliqui/APP-STACK/raw/master/mysql-connector-java-5.1.40.jar -O lib/mysql-connector-java-5.1.40.jar
+
+Configure context.xml for DB connection.
+
+Open conf/context.xml and add the following content just before the last line.
+
+<Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource"
+               maxActive="50" maxIdle="30" maxWait="10000"
+               username="student" password="student@1"
+               driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://10.142.0.7:3306/studentapp"/>
+
+Note: IP 10.142.0.7 is DB server IP address, If you are using same host then give the IP address of that host, but not localhost
+4. Start your tomcat
+
+# /root/apache-tomcat-9.0.6/bin/startup.sh
+
+Step 3 : Web Server Setup (HTTPD)
+1. Install web server
+
+# yum install httpd httpd-devel gcc -y
+
+2. Download ModJK and comnpile it
+
+# cd /root
+# wget -O- http://www-us.apache.org/dist/tomcat/tomcat-connectors/jk/tomcat-connectors-1.2.43-src.tar.gz | tar -xz
+# cd /root/tomcat-connectors-1.2.43-src/native
+# ./configure --with-apxs=/usr/bin/apxs
+# make 
+# make install
+
+3. Create ModJK confif files
+
+Create mod-jk.conf
+
+# cat /etc/httpd/conf.d/mod-jk.conf
+LoadModule jk_module modules/mod_jk.so
+
+JkWorkersFile conf.d/worker.properties
+JkMount /student local
+JkMount /student/* local
+
+# Add following lines only if you want to redirect, Also change the IP address of URL.
+RewriteEngine On
+RewriteRule ^/$ http://35.231.223.147/student
+
+Create worker.properties file
+
+# cat /etc/httpd/conf.d/worker.properties 
+worker.list=local
+worker.local.host=localhost
+worker.local.port=8009
+
+4. Restart Web Server.
+
+# systemctl enable httpd
+# systemctl start httpd
